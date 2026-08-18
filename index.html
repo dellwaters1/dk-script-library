@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DK Script Library</title>
+  <meta name="description" content="Public neon-glass catalog of Dell's automation scripts: Python, AutoHotkey, PowerShell, and more.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="orb orb-c"></div>
+
+  <div class="app">
+    <header class="topbar glass">
+      <div class="brand">
+        <span class="brand-mark"><i class="fa-solid fa-bolt"></i></span>
+        <div>
+          <div class="brand-name">DK <span>SCRIPT</span> LIBRARY</div>
+          <div class="brand-sub" id="brandSub">Public neon catalog of local automations</div>
+        </div>
+      </div>
+
+      <label class="search glass-inset">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input id="searchInput" type="search" placeholder="Search scripts, languages, folders..." autocomplete="off">
+        <kbd>Ctrl K</kbd>
+      </label>
+
+      <div class="top-actions">
+        <span class="status-pill" id="statusPill">
+          <span class="pulse"></span>
+          <span id="statusText">Loading...</span>
+        </span>
+        <button class="icon-btn" id="viewToggle" title="Toggle list view">
+          <i class="fa-solid fa-list"></i>
+        </button>
+        <button class="icon-btn local-only" id="refreshBtn" title="Rescan folders">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <aside class="sidebar glass">
+        <section>
+          <h4>Languages</h4>
+          <nav id="languageNav"></nav>
+        </section>
+        <section>
+          <h4>Categories</h4>
+          <nav id="categoryNav"></nav>
+        </section>
+        <section>
+          <h4>Collections</h4>
+          <nav id="collectionNav"></nav>
+        </section>
+        <label class="toggle-row">
+          <input type="checkbox" id="showBackups">
+          <span>Show backup copies</span>
+        </label>
+      </aside>
+
+      <main class="main">
+        <section class="hero glass">
+          <div>
+            <h1>Dark neon glass. <span>Every script, searchable.</span></h1>
+            <p id="heroMeta">Loading catalog...</p>
+          </div>
+          <div class="stat-row" id="statRow"></div>
+        </section>
+        <section class="script-grid" id="scriptGrid"></section>
+        <button class="load-more glass" id="loadMore" hidden>Load more scripts</button>
+      </main>
+    </div>
+    <footer class="site-foot">Built as a public script showcase · dark neon glass UI</footer>
+  </div>
+
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal glass">
+      <div class="modal-head">
+        <div>
+          <div class="modal-kicker" id="modalMeta"></div>
+          <h2 id="modalTitle">Script</h2>
+        </div>
+        <button class="icon-btn" id="closeModal" aria-label="Close">&times;</button>
+      </div>
+      <p class="modal-desc" id="modalDesc"></p>
+      <div class="modal-actions">
+        <button class="primary local-only" id="launchBtn"><i class="fa-solid fa-play"></i> Run</button>
+        <button class="ghost local-only" id="openBtn"><i class="fa-solid fa-folder-open"></i> Open folder</button>
+        <button class="ghost" id="copyPathBtn"><i class="fa-solid fa-copy"></i> Copy path</button>
+        <button class="ghost" id="copyCodeBtn"><i class="fa-solid fa-code"></i> Copy code</button>
+      </div>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span id="modalPath"></span>
+          <span id="modalSize"></span>
+        </div>
+        <pre><code id="modalCode" class="hljs">Loading...</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
