@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DK Script Library</title>
-  <meta name="description" content="Automation. Without the boring part. Scripts, tools and utilities built by DK.">
+  <meta name="description" content="Automation. Without the boring part. Powerful scripts, tools and utilities built to save you time.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -13,18 +13,12 @@
 <body>
   <header class="topnav">
     <a class="brand" href="#home" data-nav="home" aria-label="DK Script Library home">
-      <svg class="brand-mark" viewBox="0 0 72 40" aria-hidden="true">
-        <path d="M4 8h18c8 0 14 6 14 12s-6 12-14 12H4V8z" fill="none" stroke="currentColor" stroke-width="3"/>
-        <path d="M10 14h10c4 0 7 2.4 7 6s-3 6-7 6H10V14z" fill="currentColor"/>
-        <path d="M42 8h16l10 24H58L54 22H46l-4 10h-10L42 8z" fill="currentColor"/>
-        <circle cx="6" cy="8" r="1.6" fill="currentColor"/>
-        <circle cx="68" cy="32" r="1.6" fill="currentColor"/>
-        <path d="M2 20h4M66 20h6" stroke="currentColor" stroke-width="1.5"/>
+      <svg class="brand-mark" viewBox="0 0 56 32" aria-hidden="true">
+        <path d="M3 6h16c7 0 12 5 12 10s-5 10-12 10H3V6z" fill="none" stroke="currentColor" stroke-width="2.6"/>
+        <path d="M8 11h9c3.4 0 6 2 6 5s-2.6 5-6 5H8V11z" fill="currentColor"/>
+        <path d="M34 6h13l8 20h-8l-3-8h-6l-3 8h-8L34 6z" fill="currentColor"/>
       </svg>
-      <span class="brand-text">
-        <span>SCRIPT</span>
-        <span>LIBRARY</span>
-      </span>
+      <span class="brand-word">SCRIPT LIBRARY</span>
     </a>
 
     <nav class="nav-links" id="navLinks">
@@ -48,20 +42,33 @@
       <div class="hero">
         <div class="circuit" aria-hidden="true"></div>
         <h1>AUTOMATION.<br><span>WITHOUT THE BORING PART.</span></h1>
-        <p class="hero-lead">Scripts, tools &amp; utilities built by DK</p>
-        <p class="hero-tags">Windows &nbsp;•&nbsp; Android &nbsp;•&nbsp; ADB &nbsp;•&nbsp; AI &nbsp;•&nbsp; Automation</p>
+        <p class="hero-lead">Powerful scripts, tools &amp; utilities<br>built to save you time and simplify everything.</p>
+        <div class="hero-pills">
+          <span>💻 Windows</span>
+          <span>🤖 Android</span>
+          <span>🔌 ADB</span>
+          <span>✦ AI</span>
+          <span>🏠 Automation</span>
+        </div>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="#browse" data-nav="browse">Explore Scripts</a>
+          <span class="count-pill" id="scriptCountPill">0+ Scripts</span>
+          <a class="btn btn-primary" href="#browse" data-nav="browse">Explore Scripts ›</a>
           <a class="btn btn-ghost" href="#featured">View Featured</a>
         </div>
       </div>
 
       <div class="section-wrap" id="featured">
-        <div class="section-head">
-          <h2>Featured Scripts</h2>
-          <a href="#browse" data-nav="browse">View all →</a>
+        <div class="featured-shell">
+          <div class="section-head">
+            <h2>Featured Scripts</h2>
+            <a href="#browse" data-nav="browse">View all ›</a>
+          </div>
+          <div class="feature-row">
+            <button class="carousel-btn" id="featPrev" aria-label="Previous">‹</button>
+            <div class="feature-grid" id="featureGrid"></div>
+            <button class="carousel-btn" id="featNext" aria-label="Next">›</button>
+          </div>
         </div>
-        <div class="feature-grid" id="featureGrid"></div>
       </div>
     </section>
 
@@ -69,25 +76,30 @@
       <div class="section-wrap">
         <div class="browse-head">
           <h1>Browse Scripts</h1>
-          <label class="sort-box">
-            Sort by:
-            <select id="sortSelect">
-              <option value="newest">Newest</option>
-              <option value="name">Name</option>
-              <option value="language">Language</option>
-            </select>
-          </label>
+          <div class="browse-tools">
+            <label class="sort-box">
+              Sort by:
+              <select id="sortSelect">
+                <option value="newest">Newest</option>
+                <option value="name">Name</option>
+                <option value="language">Language</option>
+              </select>
+            </label>
+            <div class="view-toggle">
+              <button id="gridViewBtn" class="active" title="Grid">▦</button>
+              <button id="listViewBtn" title="List">☰</button>
+            </div>
+          </div>
         </div>
         <div class="browse-layout">
           <aside class="filters">
-            <h3>Filters</h3>
             <div class="filter-group">
-              <h4>Category</h4>
+              <h4>Categories</h4>
               <nav id="categoryNav"></nav>
             </div>
             <div class="filter-group">
               <h4>Language</h4>
-              <nav id="languageNav"></nav>
+              <nav id="languageNav" class="check-nav"></nav>
             </div>
             <label class="backup-toggle">
               <input type="checkbox" id="showBackups">
@@ -122,53 +134,66 @@
 
     <section class="view detail-view hidden" id="view-detail">
       <div class="section-wrap">
-        <a class="back-link" href="#browse" data-nav="browse">← Back to all scripts</a>
-        <div class="detail-title-row">
+        <div class="crumb" id="breadcrumb"></div>
+        <div class="detail-hero">
           <div>
-            <h1 id="modalTitle">Script</h1>
+            <h1><span id="modalTitle">Script</span> <button class="star-btn" id="starBtn" title="Favorite">☆</button></h1>
             <p class="detail-desc" id="modalDesc"></p>
             <div class="tag-row" id="modalTags"></div>
+          </div>
+          <div class="detail-art" aria-hidden="true">
+            <svg viewBox="0 0 220 180">
+              <defs>
+                <linearGradient id="phoneGlow" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#00e5ff"/>
+                  <stop offset="100%" stop-color="#0077ff"/>
+                </linearGradient>
+              </defs>
+              <path d="M40 150 C80 90, 150 40, 200 22" fill="none" stroke="url(#phoneGlow)" stroke-width="2" opacity=".45"/>
+              <rect x="118" y="18" width="72" height="128" rx="14" fill="none" stroke="url(#phoneGlow)" stroke-width="3"/>
+              <rect x="126" y="30" width="56" height="92" rx="4" fill="none" stroke="#00c8ff" stroke-width="1.4" opacity=".7"/>
+              <path d="M148 58 l10 18 h-8 l6 20 -16-22 h9 z" fill="#00e5ff"/>
+              <circle cx="70" cy="78" r="22" fill="none" stroke="#00c8ff" stroke-width="2"/>
+              <path d="M62 78 h16 M70 70 v16" stroke="#00c8ff" stroke-width="2"/>
+            </svg>
           </div>
         </div>
         <div class="detail-actions">
           <button class="btn btn-primary" id="downloadBtn">↓ Download</button>
-          <button class="btn btn-ghost" id="viewSourceBtn">◇ View Source</button>
+          <button class="btn btn-ghost" id="viewSourceBtn">&lt;/&gt; View Source</button>
           <button class="btn btn-ghost" id="copyCodeBtn">❏ Copy Code</button>
           <button class="btn btn-ghost local-only" id="launchBtn">▶ Run</button>
           <button class="btn btn-ghost local-only" id="openBtn">Open folder</button>
         </div>
-        <div class="detail-grid">
-          <div class="info-stack">
-            <article class="panel">
-              <h3>About</h3>
-              <p id="aboutText"></p>
-              <h3>Features</h3>
-              <ul class="feature-list" id="featureList"></ul>
-            </article>
-            <article class="panel code-panel" id="sourcePanel">
-              <div class="code-tabs">
-                <button class="tab active" data-tab="install">Installation</button>
-                <button class="tab" data-tab="source">Source Code</button>
-                <button class="icon-copy" id="copyPathBtn" title="Copy path">❏</button>
-              </div>
-              <ol class="install-steps" id="installSteps"></ol>
-              <pre class="source-block hidden" id="sourceBlock"><code id="modalCode"></code></pre>
-            </article>
-          </div>
-          <aside class="meta-col">
-            <article class="panel meta-panel">
-              <div><span>Language</span><b id="metaLanguage"></b></div>
-              <div><span>Platform</span><b id="metaPlatform"></b></div>
-              <div><span>Updated</span><b id="metaUpdated"></b></div>
-              <div><span>Collection</span><b id="metaCollection"></b></div>
-              <div><span>Size</span><b id="metaSize"></b></div>
-            </article>
-            <article class="panel terminal-panel">
-              <div class="term-bar"><span>DK Script Preview</span><i></i></div>
-              <pre id="termPreview"></pre>
-            </article>
-          </aside>
+        <div class="detail-mid">
+          <article class="panel">
+            <h3>About</h3>
+            <p id="aboutText"></p>
+          </article>
+          <article class="panel">
+            <h3>Features</h3>
+            <ul class="feature-list" id="featureList"></ul>
+          </article>
+          <article class="panel meta-panel">
+            <div><span>Language</span><b id="metaLanguage"></b></div>
+            <div><span>Platform</span><b id="metaPlatform"></b></div>
+            <div><span>Updated</span><b id="metaUpdated"></b></div>
+            <div><span>Size</span><b id="metaSize"></b></div>
+          </article>
+          <article class="panel terminal-panel">
+            <div class="term-bar"><span id="termTitle">Preview</span><i></i></div>
+            <pre id="termPreview"></pre>
+          </article>
         </div>
+        <article class="panel code-panel" id="sourcePanel">
+          <div class="code-tabs">
+            <button class="tab active" data-tab="install">Installation</button>
+            <button class="tab" data-tab="source">Source Code</button>
+            <button class="icon-copy" id="copyPathBtn" title="Copy path">❏</button>
+          </div>
+          <ol class="install-steps" id="installSteps"></ol>
+          <pre class="source-block hidden" id="sourceBlock"><code id="modalCode"></code></pre>
+        </article>
       </div>
     </section>
   </main>

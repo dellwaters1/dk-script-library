@@ -4,9 +4,8 @@ const state = {
   mode: "public",
   scripts: [],
   stats: {},
-  scannedAt: null,
   query: "",
-  language: "all",
+  language: [],
   category: "all",
   collection: "all",
   showBackups: false,
@@ -14,6 +13,8 @@ const state = {
   visible: PAGE_SIZE,
   current: null,
   view: "home",
+  featureIndex: 0,
+  starred: new Set(JSON.parse(localStorage.getItem("dk-stars") || "[]")),
 };
 
 const els = {
@@ -30,6 +31,7 @@ const els = {
   loadMore: document.getElementById("loadMore"),
   showBackups: document.getElementById("showBackups"),
   sortSelect: document.getElementById("sortSelect"),
+  scriptCountPill: document.getElementById("scriptCountPill"),
   modalTitle: document.getElementById("modalTitle"),
   modalDesc: document.getElementById("modalDesc"),
   modalTags: document.getElementById("modalTags"),
@@ -39,17 +41,23 @@ const els = {
   sourceBlock: document.getElementById("sourceBlock"),
   modalCode: document.getElementById("modalCode"),
   termPreview: document.getElementById("termPreview"),
+  termTitle: document.getElementById("termTitle"),
   metaLanguage: document.getElementById("metaLanguage"),
   metaPlatform: document.getElementById("metaPlatform"),
   metaUpdated: document.getElementById("metaUpdated"),
-  metaCollection: document.getElementById("metaCollection"),
   metaSize: document.getElementById("metaSize"),
+  breadcrumb: document.getElementById("breadcrumb"),
+  starBtn: document.getElementById("starBtn"),
   downloadBtn: document.getElementById("downloadBtn"),
   viewSourceBtn: document.getElementById("viewSourceBtn"),
   copyCodeBtn: document.getElementById("copyCodeBtn"),
   copyPathBtn: document.getElementById("copyPathBtn"),
   launchBtn: document.getElementById("launchBtn"),
   openBtn: document.getElementById("openBtn"),
+  featPrev: document.getElementById("featPrev"),
+  featNext: document.getElementById("featNext"),
+  gridViewBtn: document.getElementById("gridViewBtn"),
+  listViewBtn: document.getElementById("listViewBtn"),
 };
 
 function toast(message) {
@@ -83,26 +91,22 @@ function iconFor(script) {
 }
 
 function tagsFor(script) {
-  return [script.language, script.category, script.folder].filter(Boolean).slice(0, 3);
+  const tags = [script.language, script.category];
+  if (!script.backup) tags.push("Open Source");
+  return tags.filter(Boolean).slice(0, 4);
 }
 
 function filteredScripts() {
   const query = state.query.trim().toLowerCase();
   const items = state.scripts.filter((script) => {
     if (!state.showBackups && script.backup) return false;
-    if (state.language !== "all" && script.language !== state.language) return false;
+    if (state.language.length && !state.language.includes(script.language)) return false;
     if (state.category !== "all" && script.category !== state.category) return false;
     if (state.collection !== "all" && script.collection !== state.collection) return false;
     if (!query) return true;
     return [
-      script.name,
-      script.stem,
-      displayPath(script),
-      script.folder,
-      script.description,
-      script.language,
-      script.category,
-      script.collection,
+      script.name, script.stem, displayPath(script), script.folder,
+      script.description, script.language, script.category, script.collection,
     ].join(" ").toLowerCase().includes(query);
   });
   items.sort((a, b) => {
@@ -111,6 +115,10 @@ function filteredScripts() {
     return (b.mtime || 0) - (a.mtime || 0);
   });
   return items;
+}
+
+function featuredPool() {
+  return filteredScripts().filter((item) => !item.backup);
 }
 
 function setView(view) {
@@ -154,46 +162,53 @@ async function openLocalDetail(id) {
 function installSteps(script) {
   const name = script.name;
   if (script.language === "Python") {
-    return ["Install Python 3.10+", `Run python "${name}"`, "Edit any paths at the top of the file if needed"];
+    return ["Download the script", `Run <code>python "${name}"</code>`, "Edit any paths at the top of the file if needed"];
   }
   if (script.language === "PowerShell") {
-    return ["Open PowerShell as Administrator if the script needs it", `powershell -ExecutionPolicy Bypass -File "${name}"`];
+    return [
+      "Download the script",
+      "Run PowerShell as Administrator",
+      `Execute the script: <code>powershell -ExecutionPolicy Bypass -File "${name}"</code>`,
+    ];
   }
   if (script.language === "Batch") {
-    return ["Double-click the file, or run it from Command Prompt", `cd to the script folder, then run "${name}"`];
+    return ["Download the script", `Double-click <code>${name}</code> or run it from Command Prompt`];
   }
   if (script.language === "AutoHotkey") {
-    return ["Install AutoHotkey v2", `Open "${name}" with AutoHotkey`];
+    return ["Install AutoHotkey v2", `Open <code>${name}</code> with AutoHotkey`];
   }
   return ["Download the file", "Open it with the matching runtime for this language"];
 }
 
 function featureBullets(script) {
-  const bits = [];
-  if (script.language) bits.push(`${script.language} source`);
-  if (script.collection) bits.push(`From ${script.collection}`);
-  if (script.category) bits.push(`${script.category} workflow`);
-  if (script.lines) bits.push(`${script.lines}+ lines in this preview`);
-  bits.push("Works as a local automation script");
-  return bits.slice(0, 5);
+  return [
+    script.language ? `${script.language} source` : "Local source file",
+    script.collection ? `From ${script.collection}` : "From the DK catalog",
+    `${script.category} workflow`,
+    "Works as a local automation script",
+    script.lines ? `${script.lines}+ lines in this preview` : "Preview available",
+  ];
 }
 
 function fillDetail(script) {
   state.current = script;
   const desc = script.description || "No header description in this file.";
-  els.modalTitle.textContent = script.stem || script.name;
+  els.modalTitle.textContent = (script.stem || script.name).toUpperCase();
   els.modalDesc.textContent = desc;
   els.aboutText.textContent = desc;
   els.modalTags.innerHTML = tagsFor(script).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
   els.featureList.innerHTML = featureBullets(script).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
-  els.installSteps.innerHTML = installSteps(script).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  els.installSteps.innerHTML = installSteps(script).map((item) => `<li>${item}</li>`).join("");
   els.modalCode.textContent = script.content || script.preview || "";
   els.termPreview.textContent = script.preview || script.content || "";
+  els.termTitle.textContent = script.name;
   els.metaLanguage.textContent = script.language;
   els.metaPlatform.textContent = /android|adb/i.test(`${script.category} ${script.name}`) ? "Android / Windows" : "Windows 10/11";
   els.metaUpdated.textContent = (script.modified || "").split(" ")[0] || "—";
-  els.metaCollection.textContent = script.collection;
   els.metaSize.textContent = script.size_label;
+  els.breadcrumb.innerHTML = `<a href="#browse" data-nav="browse">Browse</a> &nbsp;&gt;&nbsp; ${escapeHtml(script.category)} &nbsp;&gt;&nbsp; ${escapeHtml(script.stem || script.name)}`;
+  els.starBtn.classList.toggle("on", state.starred.has(script.id));
+  els.starBtn.textContent = state.starred.has(script.id) ? "★" : "☆";
   showTab("install");
   setView("detail");
   history.replaceState(null, "", `#script/${script.id}`);
@@ -207,7 +222,8 @@ function showTab(name) {
 
 function cardHtml(script, featured) {
   const icon = iconFor(script);
-  const tags = tagsFor(script).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
+  const tags = tagsFor(script).filter((tag) => tag !== "Open Source").slice(0, 3)
+    .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
   const date = (script.modified || "").split(" ")[0] || "";
   return `
     <article class="card" data-id="${script.id}">
@@ -216,31 +232,32 @@ function cardHtml(script, featured) {
       <p>${escapeHtml(script.description || "No description found in the file header.")}</p>
       <div class="tag-row">${tags}</div>
       <div class="card-foot">
-        ${featured ? "<span>View script →</span>" : `<span class="date">${escapeHtml(date)}</span><span>↓</span>`}
+        ${featured ? "<span></span>" : `<span class="date">${escapeHtml(date)}</span><span>↓</span>`}
       </div>
     </article>
   `;
 }
 
 function renderFeatured() {
-  const pool = filteredScripts().filter((item) => !item.backup);
-  const picks = [];
-  for (const key of ["Android & ADB", "Voice & TTS", "Media"]) {
-    const match = pool.find((item) => item.category === key && !picks.includes(item));
-    if (match) picks.push(match);
+  const pool = featuredPool();
+  if (!pool.length) {
+    els.featureGrid.innerHTML = "";
+    return;
   }
-  while (picks.length < 3 && pool[picks.length]) picks.push(pool[picks.length]);
-  els.featureGrid.innerHTML = picks.slice(0, 3).map((script) => cardHtml(script, true)).join("");
+  const count = Math.min(3, pool.length);
+  const start = ((state.featureIndex % pool.length) + pool.length) % pool.length;
+  const picks = Array.from({ length: count }, (_, i) => pool[(start + i) % pool.length]);
+  els.featureGrid.innerHTML = picks.map((script) => cardHtml(script, true)).join("");
 }
 
 function renderFilters() {
   const cats = [["all", "All Categories"], ...Object.keys(state.stats.categories || {}).map((name) => [name, name])];
-  const langs = [["all", "All"], ...Object.keys(state.stats.languages || {}).map((name) => [name, name])];
+  const langs = Object.keys(state.stats.languages || {});
   els.categoryNav.innerHTML = cats.map(([value, label]) =>
     `<button data-key="category" data-value="${escapeHtml(value)}" class="${state.category === value ? "active" : ""}">${escapeHtml(label)}</button>`
   ).join("");
-  els.languageNav.innerHTML = langs.map(([value, label]) =>
-    `<button data-key="language" data-value="${escapeHtml(value)}" class="${state.language === value ? "active" : ""}">${escapeHtml(label)}</button>`
+  els.languageNav.innerHTML = langs.map((name) =>
+    `<button data-lang="${escapeHtml(name)}" class="${state.language.includes(name) ? "active" : ""}">${escapeHtml(name)}</button>`
   ).join("");
 }
 
@@ -270,8 +287,9 @@ function applyCatalog(data, mode) {
   state.mode = mode;
   state.scripts = data.scripts || [];
   state.stats = data.stats || {};
-  state.scannedAt = data.scanned_at;
   document.body.classList.toggle("public-mode", mode === "public");
+  const total = state.stats.total || state.scripts.length;
+  els.scriptCountPill.textContent = `${total}+ Scripts`;
   renderFeatured();
   const hash = location.hash.replace("#", "");
   if (hash.startsWith("script/")) showScript(hash.slice(7));
@@ -341,6 +359,15 @@ document.addEventListener("click", (event) => {
     renderBrowse();
     return;
   }
+  const langBtn = event.target.closest(".filters button[data-lang]");
+  if (langBtn) {
+    const lang = langBtn.dataset.lang;
+    if (state.language.includes(lang)) state.language = state.language.filter((item) => item !== lang);
+    else state.language = [...state.language, lang];
+    state.visible = PAGE_SIZE;
+    renderBrowse();
+    return;
+  }
   const collection = event.target.closest("[data-collection]");
   if (collection) {
     state.collection = collection.dataset.collection;
@@ -380,6 +407,32 @@ els.sortSelect.addEventListener("change", (event) => {
 els.loadMore.addEventListener("click", () => {
   state.visible += PAGE_SIZE;
   renderBrowse();
+});
+els.featPrev.addEventListener("click", () => {
+  state.featureIndex -= 1;
+  renderFeatured();
+});
+els.featNext.addEventListener("click", () => {
+  state.featureIndex += 1;
+  renderFeatured();
+});
+els.gridViewBtn.addEventListener("click", () => {
+  document.body.classList.remove("list-view");
+  els.gridViewBtn.classList.add("active");
+  els.listViewBtn.classList.remove("active");
+});
+els.listViewBtn.addEventListener("click", () => {
+  document.body.classList.add("list-view");
+  els.listViewBtn.classList.add("active");
+  els.gridViewBtn.classList.remove("active");
+});
+els.starBtn.addEventListener("click", () => {
+  if (!state.current) return;
+  if (state.starred.has(state.current.id)) state.starred.delete(state.current.id);
+  else state.starred.add(state.current.id);
+  localStorage.setItem("dk-stars", JSON.stringify([...state.starred]));
+  els.starBtn.classList.toggle("on", state.starred.has(state.current.id));
+  els.starBtn.textContent = state.starred.has(state.current.id) ? "★" : "☆";
 });
 els.downloadBtn.addEventListener("click", downloadCurrent);
 els.viewSourceBtn.addEventListener("click", () => {
