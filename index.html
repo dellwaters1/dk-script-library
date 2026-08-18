@@ -4,113 +4,176 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DK Script Library</title>
-  <meta name="description" content="Public neon-glass catalog of Dell's automation scripts: Python, AutoHotkey, PowerShell, and more.">
+  <meta name="description" content="Automation. Without the boring part. Scripts, tools and utilities built by DK.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="orb orb-a"></div>
-  <div class="orb orb-b"></div>
-  <div class="orb orb-c"></div>
+  <header class="topnav">
+    <a class="brand" href="#home" data-nav="home" aria-label="DK Script Library home">
+      <svg class="brand-mark" viewBox="0 0 72 40" aria-hidden="true">
+        <path d="M4 8h18c8 0 14 6 14 12s-6 12-14 12H4V8z" fill="none" stroke="currentColor" stroke-width="3"/>
+        <path d="M10 14h10c4 0 7 2.4 7 6s-3 6-7 6H10V14z" fill="currentColor"/>
+        <path d="M42 8h16l10 24H58L54 22H46l-4 10h-10L42 8z" fill="currentColor"/>
+        <circle cx="6" cy="8" r="1.6" fill="currentColor"/>
+        <circle cx="68" cy="32" r="1.6" fill="currentColor"/>
+        <path d="M2 20h4M66 20h6" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      <span class="brand-text">
+        <span>SCRIPT</span>
+        <span>LIBRARY</span>
+      </span>
+    </a>
 
-  <div class="app">
-    <header class="topbar glass">
-      <div class="brand">
-        <span class="brand-mark"><i class="fa-solid fa-bolt"></i></span>
-        <div>
-          <div class="brand-name">DK <span>SCRIPT</span> LIBRARY</div>
-          <div class="brand-sub" id="brandSub">Public neon catalog of local automations</div>
+    <nav class="nav-links" id="navLinks">
+      <a href="#browse" data-nav="browse">Browse</a>
+      <a href="#collections" data-nav="collections">Collections</a>
+      <a href="#about" data-nav="about">About</a>
+      <a href="https://github.com/dellwaters1/dk-script-library" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+
+    <form class="nav-search" id="navSearchForm">
+      <input id="searchInput" type="search" placeholder="Search scripts..." autocomplete="off">
+      <button type="submit" aria-label="Search">
+        <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l5 5" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+    </form>
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+  </header>
+
+  <main>
+    <section class="view home-view" id="view-home">
+      <div class="hero">
+        <div class="circuit" aria-hidden="true"></div>
+        <h1>AUTOMATION.<br><span>WITHOUT THE BORING PART.</span></h1>
+        <p class="hero-lead">Scripts, tools &amp; utilities built by DK</p>
+        <p class="hero-tags">Windows &nbsp;•&nbsp; Android &nbsp;•&nbsp; ADB &nbsp;•&nbsp; AI &nbsp;•&nbsp; Automation</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#browse" data-nav="browse">Explore Scripts</a>
+          <a class="btn btn-ghost" href="#featured">View Featured</a>
         </div>
       </div>
 
-      <label class="search glass-inset">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input id="searchInput" type="search" placeholder="Search scripts, languages, folders..." autocomplete="off">
-        <kbd>Ctrl K</kbd>
-      </label>
-
-      <div class="top-actions">
-        <span class="status-pill" id="statusPill">
-          <span class="pulse"></span>
-          <span id="statusText">Loading...</span>
-        </span>
-        <button class="icon-btn" id="viewToggle" title="Toggle list view">
-          <i class="fa-solid fa-list"></i>
-        </button>
-        <button class="icon-btn local-only" id="refreshBtn" title="Rescan folders">
-          <i class="fa-solid fa-rotate"></i>
-        </button>
+      <div class="section-wrap" id="featured">
+        <div class="section-head">
+          <h2>Featured Scripts</h2>
+          <a href="#browse" data-nav="browse">View all →</a>
+        </div>
+        <div class="feature-grid" id="featureGrid"></div>
       </div>
-    </header>
+    </section>
 
-    <div class="workspace">
-      <aside class="sidebar glass">
-        <section>
-          <h4>Languages</h4>
-          <nav id="languageNav"></nav>
-        </section>
-        <section>
-          <h4>Categories</h4>
-          <nav id="categoryNav"></nav>
-        </section>
-        <section>
-          <h4>Collections</h4>
-          <nav id="collectionNav"></nav>
-        </section>
-        <label class="toggle-row">
-          <input type="checkbox" id="showBackups">
-          <span>Show backup copies</span>
-        </label>
-      </aside>
-
-      <main class="main">
-        <section class="hero glass">
+    <section class="view browse-view hidden" id="view-browse">
+      <div class="section-wrap">
+        <div class="browse-head">
+          <h1>Browse Scripts</h1>
+          <label class="sort-box">
+            Sort by:
+            <select id="sortSelect">
+              <option value="newest">Newest</option>
+              <option value="name">Name</option>
+              <option value="language">Language</option>
+            </select>
+          </label>
+        </div>
+        <div class="browse-layout">
+          <aside class="filters">
+            <h3>Filters</h3>
+            <div class="filter-group">
+              <h4>Category</h4>
+              <nav id="categoryNav"></nav>
+            </div>
+            <div class="filter-group">
+              <h4>Language</h4>
+              <nav id="languageNav"></nav>
+            </div>
+            <label class="backup-toggle">
+              <input type="checkbox" id="showBackups">
+              Show backup copies
+            </label>
+          </aside>
           <div>
-            <h1>Dark neon glass. <span>Every script, searchable.</span></h1>
-            <p id="heroMeta">Loading catalog...</p>
+            <p class="browse-meta" id="heroMeta">Loading catalog...</p>
+            <div class="script-grid" id="scriptGrid"></div>
+            <button class="btn btn-ghost load-more" id="loadMore" hidden>Load more</button>
           </div>
-          <div class="stat-row" id="statRow"></div>
-        </section>
-        <section class="script-grid" id="scriptGrid"></section>
-        <button class="load-more glass" id="loadMore" hidden>Load more scripts</button>
-      </main>
-    </div>
-    <footer class="site-foot">Built as a public script showcase · dark neon glass UI</footer>
-  </div>
+        </div>
+      </div>
+    </section>
 
-  <div class="modal-overlay" id="detailModal">
-    <div class="modal glass">
-      <div class="modal-head">
-        <div>
-          <div class="modal-kicker" id="modalMeta"></div>
-          <h2 id="modalTitle">Script</h2>
+    <section class="view collections-view hidden" id="view-collections">
+      <div class="section-wrap">
+        <h1>Collections</h1>
+        <p class="page-lead">Scripts grouped by where they live on the machine.</p>
+        <div class="collection-grid" id="collectionGrid"></div>
+      </div>
+    </section>
+
+    <section class="view about-view hidden" id="view-about">
+      <div class="section-wrap about-copy">
+        <h1>About</h1>
+        <p>DK Script Library is a public catalog of Dell’s local automation scripts — Windows, Android/ADB, voice, media, and agent tooling.</p>
+        <p>Browse and preview from anywhere. Running a script or opening its folder only works on the local copy at <code>127.0.0.1:8844</code>.</p>
+        <p>Source: <a href="https://github.com/dellwaters1/dk-script-library" target="_blank" rel="noopener">github.com/dellwaters1/dk-script-library</a></p>
+      </div>
+    </section>
+
+    <section class="view detail-view hidden" id="view-detail">
+      <div class="section-wrap">
+        <a class="back-link" href="#browse" data-nav="browse">← Back to all scripts</a>
+        <div class="detail-title-row">
+          <div>
+            <h1 id="modalTitle">Script</h1>
+            <p class="detail-desc" id="modalDesc"></p>
+            <div class="tag-row" id="modalTags"></div>
+          </div>
         </div>
-        <button class="icon-btn" id="closeModal" aria-label="Close">&times;</button>
-      </div>
-      <p class="modal-desc" id="modalDesc"></p>
-      <div class="modal-actions">
-        <button class="primary local-only" id="launchBtn"><i class="fa-solid fa-play"></i> Run</button>
-        <button class="ghost local-only" id="openBtn"><i class="fa-solid fa-folder-open"></i> Open folder</button>
-        <button class="ghost" id="copyPathBtn"><i class="fa-solid fa-copy"></i> Copy path</button>
-        <button class="ghost" id="copyCodeBtn"><i class="fa-solid fa-code"></i> Copy code</button>
-      </div>
-      <div class="code-wrap">
-        <div class="code-bar">
-          <span id="modalPath"></span>
-          <span id="modalSize"></span>
+        <div class="detail-actions">
+          <button class="btn btn-primary" id="downloadBtn">↓ Download</button>
+          <button class="btn btn-ghost" id="viewSourceBtn">◇ View Source</button>
+          <button class="btn btn-ghost" id="copyCodeBtn">❏ Copy Code</button>
+          <button class="btn btn-ghost local-only" id="launchBtn">▶ Run</button>
+          <button class="btn btn-ghost local-only" id="openBtn">Open folder</button>
         </div>
-        <pre><code id="modalCode" class="hljs">Loading...</code></pre>
+        <div class="detail-grid">
+          <div class="info-stack">
+            <article class="panel">
+              <h3>About</h3>
+              <p id="aboutText"></p>
+              <h3>Features</h3>
+              <ul class="feature-list" id="featureList"></ul>
+            </article>
+            <article class="panel code-panel" id="sourcePanel">
+              <div class="code-tabs">
+                <button class="tab active" data-tab="install">Installation</button>
+                <button class="tab" data-tab="source">Source Code</button>
+                <button class="icon-copy" id="copyPathBtn" title="Copy path">❏</button>
+              </div>
+              <ol class="install-steps" id="installSteps"></ol>
+              <pre class="source-block hidden" id="sourceBlock"><code id="modalCode"></code></pre>
+            </article>
+          </div>
+          <aside class="meta-col">
+            <article class="panel meta-panel">
+              <div><span>Language</span><b id="metaLanguage"></b></div>
+              <div><span>Platform</span><b id="metaPlatform"></b></div>
+              <div><span>Updated</span><b id="metaUpdated"></b></div>
+              <div><span>Collection</span><b id="metaCollection"></b></div>
+              <div><span>Size</span><b id="metaSize"></b></div>
+            </article>
+            <article class="panel terminal-panel">
+              <div class="term-bar"><span>DK Script Preview</span><i></i></div>
+              <pre id="termPreview"></pre>
+            </article>
+          </aside>
+        </div>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
   <div class="toasts" id="toasts"></div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
