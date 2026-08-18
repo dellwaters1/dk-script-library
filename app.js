@@ -170,6 +170,13 @@ async function openLocalDetail(id) {
 
 function installSteps(script) {
   const name = script.name;
+  if (isChromecast(script)) {
+    return [
+      "Download <code>DK-Chromecast-Remote.zip</code> — that is the actual remote app",
+      "Install Python 3.10+ then <code>pip install PySide6 androidtvremote2</code>",
+      "Run <code>OPEN_TV_REMOTE.bat</code> or <code>pythonw CHROMECAST_NEST_REMOTE.pyw</code>",
+    ];
+  }
   if (script.language === "Python") {
     return ["Download the script", `Run <code>python "${name}"</code>`, "Edit any paths at the top of the file if needed"];
   }
@@ -222,7 +229,7 @@ function fillDetail(script) {
   if (art) {
     if (!art.dataset.default) art.dataset.default = art.innerHTML;
     art.innerHTML = isChromecast(script)
-      ? `<img src="assets/chromecast-real-remote.png?v=4" alt="Chromecast remote">`
+      ? `<img src="assets/chromecast-app-remote.png?v=5" alt="DK Chromecast Remote">`
       : art.dataset.default;
   }
   showTab("install");
@@ -242,13 +249,13 @@ function cardHtml(script, featured) {
     .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
   const date = (script.modified || "").split(" ")[0] || "";
   const visual = isChromecast(script)
-    ? `<img src="assets/chromecast-real-remote.png?v=4" alt="">`
+    ? `<img src="assets/chromecast-app-remote.png?v=5" alt="">`
     : `<div class="card-icon ${icon.tone}">${icon.glyph}</div>`;
   return `
     <article class="card ${isChromecast(script) ? "card-remote" : ""}" data-id="${script.id}">
       ${visual}
       <h3>${escapeHtml(isChromecast(script) ? "CHROMECAST REMOTE" : (script.stem || script.name).toUpperCase())}</h3>
-      <p>${escapeHtml(isChromecast(script) ? "The floating desktop remote — no window borders, just the clicker." : (script.description || "No description found in the file header."))}</p>
+      <p>${escapeHtml(isChromecast(script) ? "The actual desktop remote you download — restored full clicker, no window frame." : (script.description || "No description found in the file header."))}</p>
       <div class="tag-row">${tags}</div>
       <div class="card-foot">
         ${featured ? "<span></span>" : `<span class="date">${escapeHtml(date)}</span><span>↓</span>`}
@@ -339,13 +346,24 @@ async function loadScripts() {
 
 function downloadCurrent() {
   if (!state.current) return;
+  const link = document.createElement("a");
+  if (isChromecast(state.current)) {
+    link.href = "downloads/DK-Chromecast-Remote.zip";
+    link.download = "DK-Chromecast-Remote.zip";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    toast("Downloaded the actual Chromecast Remote app");
+    return;
+  }
   const text = state.current.content || state.current.preview || "";
   const blob = new Blob([text], { type: "text/plain" });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
   link.href = url;
   link.download = state.current.name;
+  document.body.appendChild(link);
   link.click();
+  link.remove();
   URL.revokeObjectURL(url);
   toast(`Downloaded ${state.current.name}`);
 }
