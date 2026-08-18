@@ -229,7 +229,7 @@ function fillDetail(script) {
   if (art) {
     if (!art.dataset.default) art.dataset.default = art.innerHTML;
     art.innerHTML = isChromecast(script)
-      ? `<img src="assets/chromecast-app-remote.png?v=6" alt="DK Chromecast Remote">`
+      ? `<img src="assets/chromecast-app-remote.png?v=7" alt="DK Chromecast Remote">`
       : art.dataset.default;
   }
   showTab("install");
@@ -249,7 +249,7 @@ function cardHtml(script, featured) {
     .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
   const date = (script.modified || "").split(" ")[0] || "";
   const visual = isChromecast(script)
-    ? `<img src="assets/chromecast-app-remote.png?v=6" alt="">`
+    ? `<img src="assets/chromecast-app-remote.png?v=7" alt="">`
     : `<div class="card-icon ${icon.tone}">${icon.glyph}</div>`;
   return `
     <article class="card ${isChromecast(script) ? "card-remote" : ""}" data-id="${script.id}">
