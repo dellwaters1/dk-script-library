@@ -90,6 +90,15 @@ function iconFor(script) {
   return { glyph: "</>", tone: "" };
 }
 
+function isChromecast(script) {
+  const blob = `${script.name} ${script.stem} ${script.path || ""}`.toLowerCase();
+  return blob.includes("chromecast") || blob.includes("cromcast");
+}
+
+function chromecastScript() {
+  return state.scripts.find((item) => isChromecast(item) && !item.backup);
+}
+
 function tagsFor(script) {
   const tags = [script.language, script.category];
   if (!script.backup) tags.push("Open Source");
@@ -209,6 +218,13 @@ function fillDetail(script) {
   els.breadcrumb.innerHTML = `<a href="#browse" data-nav="browse">Browse</a> &nbsp;&gt;&nbsp; ${escapeHtml(script.category)} &nbsp;&gt;&nbsp; ${escapeHtml(script.stem || script.name)}`;
   els.starBtn.classList.toggle("on", state.starred.has(script.id));
   els.starBtn.textContent = state.starred.has(script.id) ? "★" : "☆";
+  const art = document.querySelector(".detail-art");
+  if (art) {
+    if (!art.dataset.default) art.dataset.default = art.innerHTML;
+    art.innerHTML = isChromecast(script)
+      ? `<img src="assets/chromecast-remote-full.png" alt="Chromecast remote">`
+      : art.dataset.default;
+  }
   showTab("install");
   setView("detail");
   history.replaceState(null, "", `#script/${script.id}`);
@@ -225,11 +241,14 @@ function cardHtml(script, featured) {
   const tags = tagsFor(script).filter((tag) => tag !== "Open Source").slice(0, 3)
     .map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("");
   const date = (script.modified || "").split(" ")[0] || "";
+  const visual = isChromecast(script)
+    ? `<img src="assets/chromecast-remote-mini.png" alt="">`
+    : `<div class="card-icon ${icon.tone}">${icon.glyph}</div>`;
   return `
-    <article class="card" data-id="${script.id}">
-      <div class="card-icon ${icon.tone}">${icon.glyph}</div>
-      <h3>${escapeHtml((script.stem || script.name).toUpperCase())}</h3>
-      <p>${escapeHtml(script.description || "No description found in the file header.")}</p>
+    <article class="card ${isChromecast(script) ? "card-remote" : ""}" data-id="${script.id}">
+      ${visual}
+      <h3>${escapeHtml(isChromecast(script) ? "CHROMECAST REMOTE" : (script.stem || script.name).toUpperCase())}</h3>
+      <p>${escapeHtml(isChromecast(script) ? "The floating desktop remote — no window borders, just the clicker." : (script.description || "No description found in the file header."))}</p>
       <div class="tag-row">${tags}</div>
       <div class="card-foot">
         ${featured ? "<span></span>" : `<span class="date">${escapeHtml(date)}</span><span>↓</span>`}
@@ -240,13 +259,19 @@ function cardHtml(script, featured) {
 
 function renderFeatured() {
   const pool = featuredPool();
-  if (!pool.length) {
+  const pinned = chromecastScript();
+  const rest = pool.filter((item) => !pinned || item.id !== pinned.id);
+  const ordered = pinned ? [pinned, ...rest] : rest;
+  if (!ordered.length) {
     els.featureGrid.innerHTML = "";
     return;
   }
-  const count = Math.min(3, pool.length);
-  const start = ((state.featureIndex % pool.length) + pool.length) % pool.length;
-  const picks = Array.from({ length: count }, (_, i) => pool[(start + i) % pool.length]);
+  const count = Math.min(3, ordered.length);
+  const start = pinned ? 0 : ((state.featureIndex % ordered.length) + ordered.length) % ordered.length;
+  const picks = Array.from({ length: count }, (_, i) => ordered[(start + i) % ordered.length]);
+  if (pinned && !picks.includes(pinned)) {
+    picks[0] = pinned;
+  }
   els.featureGrid.innerHTML = picks.map((script) => cardHtml(script, true)).join("");
 }
 
@@ -380,6 +405,10 @@ document.addEventListener("click", (event) => {
   if (card) showScript(card.dataset.id);
 });
 
+document.getElementById("heroRemote")?.addEventListener("click", () => {
+  const script = chromecastScript();
+  if (script) showScript(script.id);
+});
 els.menuBtn.addEventListener("click", () => els.navLinks.classList.toggle("open"));
 els.navSearchForm.addEventListener("submit", (event) => {
   event.preventDefault();
