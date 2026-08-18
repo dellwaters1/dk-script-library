@@ -174,12 +174,14 @@ button, select { cursor: pointer; }
   height: min(520px, 78vh);
   width: auto;
   display: block;
+  border-radius: 999px;
   filter: drop-shadow(0 22px 28px rgba(0, 0, 0, 0.55));
 }
 .detail-art img {
   width: 150px;
   height: auto;
   display: block;
+  border-radius: 999px;
   filter: drop-shadow(0 16px 22px rgba(0, 0, 0, 0.45));
 }
 .card-remote {
@@ -189,6 +191,7 @@ button, select { cursor: pointer; }
 .card-remote img {
   height: 150px;
   width: auto;
+  border-radius: 999px;
   filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.4));
 }
 
